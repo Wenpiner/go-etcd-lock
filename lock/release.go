@@ -12,7 +12,12 @@ func (l *EtcdLock) Release() error {
 	}
 	l.Lock()
 	defer l.Unlock()
-
+	if l.released {
+		return nil
+	}
+	defer func() {
+		l.released = true
+	}()
 	defer l.session.Close()
 	return l.mutex.Unlock(context.Background())
 }

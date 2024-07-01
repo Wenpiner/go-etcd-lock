@@ -3,12 +3,12 @@ package lock
 import (
 	"context"
 	"fmt"
+	"gopkg.in/errgo.v1"
 	"sync"
 	"time"
 
 	etcd "go.etcd.io/etcd/client/v3"
 	"go.etcd.io/etcd/client/v3/concurrency"
-	"gopkg.in/errgo.v1"
 )
 
 type ErrAlreadyLocked struct{}
@@ -78,6 +78,8 @@ type EtcdLock struct {
 	*sync.Mutex
 	mutex   *concurrency.Mutex
 	session *concurrency.Session
+	// Release flag to avoid releasing the lock twice
+	released bool
 }
 
 func (locker *EtcdLocker) Acquire(key string, ttl int) (Lock, error) {
